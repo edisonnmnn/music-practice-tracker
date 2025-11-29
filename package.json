@@ -1,0 +1,29 @@
+{
+  "name": "music-practice-tracker",
+  "version": "1.0.0",
+  "description": "A full-stack web application for musicians to log practice sessions and track progress over time.",
+  "homepage": "https://github.com/edisonnmnn/music-practice-tracker#readme",
+  "bugs": {
+    "url": "https://github.com/edisonnmnn/music-practice-tracker/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/edisonnmnn/music-practice-tracker.git"
+  },
+  "license": "ISC",
+  "author": "Edison Kuo",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  }
+}
