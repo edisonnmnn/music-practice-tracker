@@ -66,6 +66,14 @@ function Dashboard() {
   });
   const [editingGoal, setEditingGoal] = useState(false);
   const [tempGoal, setTempGoal] = useState(weeklyGoal);
+
+  // Goal history state
+  const [goalHistory, setGoalHistory] = useState(() => {
+    const saved = localStorage.getItem('goalHistory');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [showCelebration, setShowCelebration] = useState(false);
+
   // Load sessions and stats on mount
   useEffect(() => {
     loadData();
@@ -75,6 +83,74 @@ function Dashboard() {
   useEffect(() => {
     applyFilters();
   }, [sessions, filters]);
+
+// Get weekly stats (last 7 days)
+const getWeeklyStats = () => {
+  const today = new Date();
+  const weekAgo = new Date(today);
+  weekAgo.setDate(weekAgo.getDate() - 7);
+
+  const weekSessions = sessions.filter(s => {
+    const sessionDate = new Date(s.date);
+    return sessionDate >= weekAgo && sessionDate <= today;
+  });
+
+  const totalMinutes = weekSessions.reduce((sum, s) => sum + s.duration, 0);
+  return { totalMinutes, totalSessions: weekSessions.length };
+};
+
+// Get sessions for calendar date
+const getSessionsForDate = (date) => {
+  const dateStr = date.toISOString().split('T')[0];
+  return sessions.filter(s => s.date.startsWith(dateStr));
+};
+
+// Calculate weekly stats
+const weeklyStats = getWeeklyStats();
+const weeklyProgress = Math.min((weeklyStats.totalMinutes / weeklyGoal) * 100, 100);
+
+// Check if goal is reached AND update goal history
+useEffect(() => {
+  if (sessions.length > 0) {
+    const currentWeek = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    
+    // Update or add current week's entry in goal history
+    const existingEntryIndex = goalHistory.findIndex(entry => entry.weekStart === currentWeek);
+    
+    if (weeklyStats.totalMinutes > 0) {
+      const currentEntry = {
+        date: new Date().toISOString(),
+        goal: weeklyGoal,
+        achieved: weeklyStats.totalMinutes,
+        weekStart: currentWeek
+      };
+      
+      let updatedHistory;
+      if (existingEntryIndex >= 0) {
+        // Update existing entry
+        updatedHistory = [...goalHistory];
+        updatedHistory[existingEntryIndex] = currentEntry;
+      } else {
+        // Add new entry
+        updatedHistory = [currentEntry, ...goalHistory].slice(0, 10);
+      }
+      
+      setGoalHistory(updatedHistory);
+      localStorage.setItem('goalHistory', JSON.stringify(updatedHistory));
+    }
+    
+    // Show celebration if goal reached
+    if (weeklyStats.totalMinutes >= weeklyGoal && weeklyStats.totalMinutes > 0) {
+      const currentGoalKey = `goal-${weeklyGoal}-week-${new Date().toISOString().split('T')[0]}`;
+      const alreadyCelebrated = localStorage.getItem(currentGoalKey);
+      
+      if (!alreadyCelebrated) {
+        setShowCelebration(true);
+        localStorage.setItem(currentGoalKey, 'true');
+      }
+    }
+  }
+}, [sessions, weeklyGoal, weeklyStats.totalMinutes]);
 
   const loadData = async () => {
     try {
@@ -213,27 +289,6 @@ function Dashboard() {
     setEditingGoal(false);
   };
 
-  // Get weekly stats (last 7 days)
-  const getWeeklyStats = () => {
-    const today = new Date();
-    const weekAgo = new Date(today);
-    weekAgo.setDate(weekAgo.getDate() - 7);
-
-    const weekSessions = sessions.filter(s => {
-      const sessionDate = new Date(s.date);
-      return sessionDate >= weekAgo && sessionDate <= today;
-    });
-
-    const totalMinutes = weekSessions.reduce((sum, s) => sum + s.duration, 0);
-    return { totalMinutes, totalSessions: weekSessions.length };
-  };
-
-  // Get sessions for calendar date
-  const getSessionsForDate = (date) => {
-    const dateStr = date.toISOString().split('T')[0];
-    return sessions.filter(s => s.date.startsWith(dateStr));
-  };
-
   // Prepare chart data
   const getChartData = () => {
     if (!stats || !stats.practiceByDate) return null;
@@ -278,15 +333,49 @@ function Dashboard() {
     }
   };
 
-  const weeklyStats = getWeeklyStats();
-  const weeklyProgress = Math.min((weeklyStats.totalMinutes / weeklyGoal) * 100, 100);
-
   if (loading) {
     return <div className="dashboard">Loading...</div>;
   }
 
+  const CelebrationModal = () => (
+    <div className="celebration-overlay" onClick={() => setShowCelebration(false)}>
+      <div className="celebration-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="celebration-content">
+          <div className="celebration-emoji">🎉</div>
+          <h2>Congratulations!</h2>
+          <p>You've reached your weekly practice goal!</p>
+          <p className="celebration-stats">
+            <strong>{weeklyStats.totalMinutes} minutes</strong> practiced this week
+          </p>
+          <div className="celebration-actions">
+            <button 
+              onClick={() => {
+                setTempGoal(Math.ceil(weeklyGoal * 1.2)); // Suggest 20% increase
+                setEditingGoal(true);
+                setShowCelebration(false);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }} 
+              className="btn-primary"
+            >
+              Increase Goal
+            </button>
+            <button 
+              onClick={() => setShowCelebration(false)} 
+              className="btn-secondary"
+            >
+              Keep Current Goal
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="dashboard">
+      {/* Celebration Modal */}
+      {showCelebration && <CelebrationModal />}
+
       {/* Header */}
       <header className="dashboard-header">
         <div>
@@ -590,6 +679,29 @@ function Dashboard() {
           {getChartData() && (
             <div className="chart-container">
               <Line data={getChartData()} options={chartOptions} />
+            </div>
+          )}
+
+          {/* Goal History */}
+          {goalHistory.length > 0 && (
+            <div className="stats-details">
+              <h2>Goal History</h2>
+              <div className="goal-history">
+                {goalHistory.map((entry, index) => (
+                  <div key={index} className="history-item">
+                    <div className="history-date">
+                      Week of {new Date(entry.weekStart).toLocaleDateString()}
+                    </div>
+                    <div className="history-stats">
+                      <span className="history-goal">Goal: {entry.goal} min</span>
+                      <span className="history-achieved">Achieved: {entry.achieved} min</span>
+                      <span className={`history-badge ${entry.achieved >= entry.goal ? 'success' : 'partial'}`}>
+                        {entry.achieved >= entry.goal ? 'Completed' : 'In Progress'}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 

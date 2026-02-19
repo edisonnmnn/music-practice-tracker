@@ -293,6 +293,7 @@
 /* Weekly Progress Bar */
 .stat-card.weekly {
   background: #97a7c2;
+  margin-bottom: 10px;
 }
 
 .progress-bar {
@@ -412,6 +413,192 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* Celebration Modal */
+.celebration-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.celebration-modal {
+  background: white;
+  border-radius: 16px;
+  padding: 40px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.4s ease;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.celebration-content {
+  text-align: center;
+}
+
+.celebration-emoji {
+  font-size: 80px;
+  margin-bottom: 20px;
+  animation: bounce 0.6s ease infinite alternate;
+}
+
+@keyframes bounce {
+  from { transform: translateY(0); }
+  to { transform: translateY(-10px); }
+}
+
+.celebration-modal h2 {
+  color: #273055;
+  font-size: 32px;
+  margin-bottom: 15px;
+}
+
+.celebration-modal p {
+  color: #666;
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.celebration-stats {
+  background: #f0f0f0;
+  padding: 15px;
+  border-radius: 8px;
+  margin: 20px 0;
+}
+
+.celebration-stats strong {
+  color: #273055;
+  font-size: 24px;
+}
+
+.celebration-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 30px;
+  justify-content: center;
+}
+
+.celebration-actions .btn-primary,
+.celebration-actions .btn-secondary {
+  flex: 1;
+  max-width: 200px;
+}
+
+/* Goal History */
+.goal-history {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.history-item {
+  background: #f9f9f9;
+  border: 2px solid #eee;
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.2s;
+}
+
+.history-item:hover {
+  border-color: #273055;
+  box-shadow: 0 4px 12px rgba(39, 48, 85, 0.1);
+}
+
+.history-date {
+  font-weight: 600;
+  color: #273055;
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+
+.history-stats {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.history-goal,
+.history-achieved {
+  color: #666;
+  font-size: 14px;
+}
+
+.history-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-left: auto;
+}
+
+.history-badge.success {
+  background: #d4edda;
+  color: #155724;
+}
+
+.history-badge.partial {
+  background: #fff3cd;
+  color: #856404;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .celebration-modal {
+    padding: 30px 20px;
+  }
+
+  .celebration-emoji {
+    font-size: 60px;
+  }
+
+  .celebration-modal h2 {
+    font-size: 24px;
+  }
+
+  .celebration-actions {
+    flex-direction: column;
+  }
+
+  .celebration-actions .btn-primary,
+  .celebration-actions .btn-secondary {
+    max-width: 100%;
+  }
+
+  .history-stats {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .history-badge {
+    margin-left: 0;
+  }
 }
 
 /* Session Buttons */
