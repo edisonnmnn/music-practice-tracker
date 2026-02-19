@@ -1,4 +1,4 @@
-# Music Practice Tracker 🎵
+# Music Practice Tracker
 
 **Created by Edison**
 
