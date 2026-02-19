@@ -11,6 +11,7 @@
   margin-bottom: 30px;
   padding-bottom: 20px;
   border-bottom: 2px solid #eee;
+  font-family:Georgia, 'Times New Roman', Times, serif;
 }
 
 .dashboard-header h1 {
@@ -27,7 +28,7 @@
 
 /* Buttons */
 .btn-primary {
-  background: #667eea;
+  background: #273055;
   color: white;
   border: none;
   padding: 12px 24px;
@@ -36,6 +37,7 @@
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s;
+  font-family:Georgia, 'Times New Roman', Times, serif
 }
 
 .btn-primary:hover {
@@ -52,7 +54,9 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
+  font-family:Georgia, 'Times New Roman', Times, serif
 }
+
 
 .btn-secondary:hover {
   background: #667eea;
@@ -63,15 +67,28 @@
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 20px;
+  font-size: 18px;
   padding: 5px;
-  transition: transform 0.2s;
+  transition: transform 0.3s;
 }
 
 .btn-delete:hover {
   transform: scale(1.2);
 }
 
+.btn-update {
+  background: #273055;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  margin-top: 10px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-family:Georgia, 'Times New Roman', Times, serif;
+}
 /* Error Banner */
 .error-banner {
   background: #fee;
@@ -91,7 +108,7 @@
 }
 
 .stat-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background:#97a7c2;
   color: white;
   padding: 25px;
   border-radius: 12px;
@@ -126,6 +143,7 @@
   border-radius: 12px;
   padding: 30px;
   margin-bottom: 30px;
+  font-family:Georgia, 'Times New Roman', Times, serif;
 }
 
 .session-form h2 {
@@ -174,6 +192,7 @@
 
 /* Sessions Section */
 .sessions-section {
+  font-family:Georgia, 'Times New Roman', Times, serif;
   margin-top: 40px;
 }
 
@@ -204,7 +223,7 @@
 }
 
 .session-card:hover {
-  border-color: #667eea;
+  border-color: 	#C8C8C8;
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
 }
 
@@ -239,8 +258,375 @@
   border-radius: 6px;
 }
 
-/* Responsive */
+/* Your existing styles stay the same, add these new ones: */
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+  border-bottom: 2px solid #eee;
+}
+
+.tab {
+  background: none;
+  border: none;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s;
+}
+
+.tab:hover {
+  color: #273055;
+  background: #f5f5f5;
+}
+
+.tab.active {
+  color: #273055;
+  border-bottom-color: #273055;
+}
+
+/* Weekly Progress Bar */
+.stat-card.weekly {
+  background: #97a7c2;
+}
+
+.progress-bar {
+  background: rgba(255, 255, 255, 0.3);
+  height: 8px;
+  border-radius: 4px;
+  margin: 15px 0 10px 0;
+  overflow: hidden;
+}
+
+.progress-fill {
+  background: white;
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  font-size: 12px;
+  opacity: 0.9;
+  margin: 0;
+}
+
+/* Filters */
+.filters {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.filter-input {
+  padding: 10px;
+  border: 2px solid #eee;
+  border-radius: 6px;
+  font-size: 14px;
+  flex: 1;
+  min-width: 150px;
+}
+
+.filter-input:focus {
+  outline: none;
+  border-color: #273055;
+}
+
+/* Goal Controls */
+.goal-controls {
+  margin-top: 10px;
+}
+
+.goal-edit {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+}
+
+.goal-input {
+  width: 80px;
+  padding: 6px;
+  border: 2px solid white;
+  border-radius: 4px;
+  font-size: 14px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.goal-input:focus {
+  outline: none;
+  border-color: #273055;
+}
+
+.btn-goal-save,
+.btn-goal-cancel {
+  background: white;
+  color: #273055;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+.btn-goal-save:hover {
+  background: #273055;
+  color: white;
+}
+
+.btn-goal-cancel:hover {
+  background: #e74c3c;
+  color: white;
+}
+
+.btn-edit-goal {
+  background: none;
+  color: white;
+  border: 1px solid white;
+  padding: 4px 10px;
+  margin-left: 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  font-weight: 600;
+}
+
+.btn-edit-goal:hover {
+  background: white;
+  color: #273055;
+}
+
+.progress-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Session Buttons */
+.session-buttons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.btn-edit, .btn-delete {
+    font-family:Georgia, 'Times New Roman', Times, serif
+}
+
+.btn-edit {
+  background: #273055;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-edit:hover {
+  background: #5568d3;
+  transform: translateY(-2px);
+}
+
+.btn-delete {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-delete:hover {
+  background: #c0392b;
+  transform: translateY(-2px);
+}
+
+/* Calendar View */
+.calendar-view {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin-top: 20px;
+  font-family:Georgia, 'Times New Roman', Times, serif;
+}
+
+.calendar-container {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  border: 2px solid #eee;
+}
+
+.react-calendar {
+  width: 100%;
+  border: none;
+  font-family: inherit;
+}
+
+.react-calendar__tile {
+  padding: 15px 5px;
+  position: relative;
+}
+
+.react-calendar__tile.has-sessions {
+  background: #e8ebf7;
+  font-weight: 600;
+}
+
+.react-calendar__tile--active {
+  background: #273055 !important;
+  color: white;
+}
+
+.react-calendar__tile--now {
+  background: #f0f0f0;
+}
+
+.calendar-badge {
+  font-size: 10px;
+  color: #273055;
+  font-weight: bold;
+  margin-top: 2px;
+}
+
+.calendar-sessions {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  border: 2px solid #eee;
+}
+
+.calendar-sessions h3 {
+  margin: 0 0 20px 0;
+  color: #273055;
+  font-size: 18px;
+}
+
+/* Statistics View */
+.stats-view {
+  margin-top: 20px;
+}
+
+.chart-container {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  border: 2px solid #eee;
+  margin-bottom: 30px;
+  height: 400px;
+}
+
+.stats-details {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  border: 2px solid #eee;
+}
+
+.stats-header {
+    font-family:Georgia, 'Times New Roman', Times, serif;
+}
+
+.stats-details h2 {
+  margin: 0 0 20px 0;
+  color: #333;
+}
+
+.breakdown-section {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.breakdown-item {
+  display: grid;
+  grid-template-columns: 150px 1fr 120px;
+  gap: 15px;
+  align-items: center;
+}
+
+.breakdown-label {
+  font-weight: 600;
+  color: #333;
+  font-size: 16px;
+}
+
+.breakdown-bar-container {
+  background: #f0f0f0;
+  height: 30px;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.breakdown-bar {
+  background: linear-gradient(90deg, #273055 0%, #97a7c2 100%);
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.5s ease;
+}
+
+.breakdown-value {
+  font-weight: 600;
+  color: #273055;
+  text-align: right;
+}
+
+/* Action buttons spacing */
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+/* Responsive Updates */
 @media (max-width: 768px) {
+  .calendar-view {
+    grid-template-columns: 1fr;
+  }
+
+  .tabs {
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .breakdown-item {
+    grid-template-columns: 1fr;
+    gap: 5px;
+  }
+
+  .breakdown-value {
+    text-align: left;
+  }
+
+  .filters {
+    flex-direction: column;
+  }
+
+  .filter-input {
+    width: 100%;
+  }
+
+  .chart-container {
+    padding: 15px;
+    height: 300px;
+  }
+
   .dashboard-header {
     flex-direction: column;
     align-items: flex-start;
