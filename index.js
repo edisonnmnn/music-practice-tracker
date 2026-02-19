@@ -1,25 +1,24 @@
 const express = require('express');
-const path = require('path');
+const cors = require('cors');
+require('dotenv').config();
 const app = express();
+const PORT = process.env.PORT || 3001;
 
-app.set('view engine', 'pug');
-app.set('views', path.join(__dirname, 'views'));
-app.set('port', process.env.PORT || 3000);
+// Testing Database Connection
+const pool = require('./config/db');
 
-app.use((req, res, next) => {
-    console.log(`${req.method} request for ${req.url}`);
-    next();
-});
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/sessions', require('./routes/sessions'));
 
+// Test route
 app.get('/', (req, res) => {
-    res.send('Hello World');
+    console.log('Route hit!'); // Add this line
+    res.json({message: 'Practice Tracker is running!'});
 });
 
-app.post('/submit-form', (req, res) => {
-    res.send('Form submitted');
-});
-
-const port = app.get('port');
-app.listen(port, () => {
-    console.log(`Server listening on port ${port}`);
+app.listen(PORT, () => {
+    console.log(`Server Running on http://localhost:${PORT}`);
 });
