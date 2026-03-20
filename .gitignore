@@ -89,3 +89,5 @@ coverage/
 ```
 JWT_SECRET=your_super_secret_key
 DATABASE_URL=postgresql://user:password@localhost/db
+# Added by ggshield
+.cache_ggshield
