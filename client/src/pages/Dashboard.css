@@ -849,6 +849,28 @@
   margin-bottom: 20px;
 }
 
+.coaching-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.coaching-input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.coaching-input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
 .coaching-response {
   margin-top: 20px;
   padding: 20px;

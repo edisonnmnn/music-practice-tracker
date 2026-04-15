@@ -44,6 +44,7 @@ function Dashboard({ user }) {
   const [coachingHistory, setCoachingHistory] = useState([]);
   const [coachingLoading, setCoachingLoading] = useState(false);
   const [coachingError, setCoachingError] = useState('');
+  const [coachingPrompt, setCoachingPrompt] = useState('');
 
   // Form state
   const [showForm, setShowForm] = useState(false);
@@ -757,14 +758,16 @@ useEffect(() => {
           <div className="coaching-card">
             <h2>AI Practice Coach</h2>
             <p className="coaching-description">
-              Get personalised advice based on your practice sessions from the last 30 days.
+              Ask a question about your practice, or get general coaching based on your last 30 days.
             </p>
-            <button
-              onClick={async () => {
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
                 setCoachingLoading(true);
                 setCoachingError('');
+                setCoaching(null);
                 try {
-                  const res = await coachingAPI.getAdvice();
+                  const res = await coachingAPI.getAdvice(coachingPrompt);
                   setCoaching(res.data);
                 } catch (err) {
                   setCoachingError(
@@ -774,11 +777,23 @@ useEffect(() => {
                   setCoachingLoading(false);
                 }
               }}
-              className="btn-primary"
-              disabled={coachingLoading}
+              className="coaching-form"
             >
-              {coachingLoading ? 'Thinking...' : 'Get Coaching Advice'}
-            </button>
+              <textarea
+                value={coachingPrompt}
+                onChange={(e) => setCoachingPrompt(e.target.value)}
+                placeholder="e.g. How can I improve my piano sight-reading? What should I focus on next? (Leave empty for general advice)"
+                rows="3"
+                className="coaching-input"
+              />
+              <button
+                type="submit"
+                className="btn-primary"
+                disabled={coachingLoading}
+              >
+                {coachingLoading ? 'Thinking...' : 'Ask Coach'}
+              </button>
+            </form>
 
             {coachingError && (
               <div className="error-banner" style={{ marginTop: '15px' }}>

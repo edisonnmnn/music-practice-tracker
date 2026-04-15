@@ -40,7 +40,7 @@ export const sessionsAPI = {
 };
 
 export const coachingAPI = {
-  getAdvice: () => api.get('/api/coaching'),
+  getAdvice: (prompt = '') => api.post('/api/coaching', { prompt }),
   getHistory: (page = 1) => api.get(`/api/coaching/history?page=${page}`),
 };
 

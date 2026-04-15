@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import pool from '../config/db';
 import { isAuthenticated } from '../middleware/auth';
-import { cacheGet, cacheSet, cacheKeys } from '../config/cache';
+import { cacheGet, cacheSet, cacheInvalidate, cacheKeys } from '../config/cache';
 import { generatePracticeCoaching } from '../services/gemini';
 import { PracticeSession, CoachingHistory } from '../types';
 
@@ -11,18 +11,21 @@ router.use(isAuthenticated);
 const COACHING_TTL = 3600; // 1 hour
 const PAGE_SIZE    = 10;
 
-// ── GET /api/coaching — Generate (or return cached) coaching advice ───────────
+// ── POST /api/coaching — Generate coaching advice (accepts optional user prompt) ─
 
-router.get('/', async (req: Request, res: Response): Promise<void> => {
+router.post('/', async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = req.user!.id;
-    const cacheKey = cacheKeys.userCoaching(userId);
+    const userPrompt = (req.body as { prompt?: string }).prompt?.trim() || '';
 
-    const cached = await cacheGet<{ advice: string; sessionCount: number }>(cacheKey);
-    if (cached) {
-      res.set('Cache-Control', `private, max-age=${COACHING_TTL}`);
-      res.json(cached);
-      return;
+    // Only use cache when there's no custom prompt
+    if (!userPrompt) {
+      const cacheKey = cacheKeys.userCoaching(userId);
+      const cached = await cacheGet<{ advice: string; sessionCount: number }>(cacheKey);
+      if (cached) {
+        res.json(cached);
+        return;
+      }
     }
 
     // Fetch sessions from last 30 days
@@ -46,7 +49,7 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const advice = await generatePracticeCoaching(sessions);
+    const advice = await generatePracticeCoaching(sessions, userPrompt);
 
     // Persist to coaching_history
     await pool.query(
@@ -56,9 +59,13 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
     );
 
     const payload = { advice, sessionCount: sessions.length };
-    await cacheSet(cacheKey, payload, COACHING_TTL);
 
-    res.set('Cache-Control', `private, max-age=${COACHING_TTL}`);
+    // Only cache generic requests
+    if (!userPrompt) {
+      const cacheKey = cacheKeys.userCoaching(userId);
+      await cacheSet(cacheKey, payload, COACHING_TTL);
+    }
+
     res.json(payload);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

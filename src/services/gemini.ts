@@ -17,7 +17,10 @@ function formatSessionsForPrompt(sessions: PracticeSession[]): string {
     .join('\n');
 }
 
-export async function generatePracticeCoaching(sessions: PracticeSession[]): Promise<string> {
+export async function generatePracticeCoaching(
+  sessions: PracticeSession[],
+  userPrompt?: string,
+): Promise<string> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     throw new Error('GEMINI_API_KEY is not configured');
@@ -31,10 +34,15 @@ export async function generatePracticeCoaching(sessions: PracticeSession[]): Pro
 
   const sessionSummary = formatSessionsForPrompt(sessions);
 
-  const result = await model.generateContent(
-    `Here are my practice sessions from the last 30 days:\n\n${sessionSummary}\n\n` +
-    'Please give me personalised coaching advice based on this history.',
-  );
+  let prompt = `Here are my practice sessions from the last 30 days:\n\n${sessionSummary}\n\n`;
+
+  if (userPrompt) {
+    prompt += `The user has a specific question: "${userPrompt}"\n\nPlease answer their question based on their practice history.`;
+  } else {
+    prompt += 'Please give me personalised coaching advice based on this history.';
+  }
+
+  const result = await model.generateContent(prompt);
 
   const text = result.response.text();
   if (!text) throw new Error('No text response from Gemini');
