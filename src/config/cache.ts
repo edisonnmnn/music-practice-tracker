@@ -9,11 +9,11 @@ export async function cacheGet<T>(key: string): Promise<T | null> {
 }
 
 export async function cacheSet<T>(key: string, value: T, ttlSeconds = DEFAULT_TTL): Promise<void> {
-  await redis.set(key, JSON.stringify(value), 'EX', ttlSeconds);
+  await redis.set(key, JSON.stringify(value), { EX: ttlSeconds });
 }
 
 export async function cacheInvalidate(...keys: string[]): Promise<void> {
-  if (keys.length > 0) await redis.del(...keys);
+  if (keys.length > 0) await redis.del(keys);
 }
 
 // ── Key helpers ───────────────────────────────────────────────────────────────
