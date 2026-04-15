@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { sessionsAPI, authAPI, coachingAPI } from '../services/api';
+import ReactMarkdown from 'react-markdown';
 import Calendar from 'react-calendar';
 import { Line } from 'react-chartjs-2';
 import {
@@ -790,7 +791,7 @@ useEffect(() => {
                 <p className="coaching-meta">
                   Based on {coaching.sessionCount} session{coaching.sessionCount !== 1 ? 's' : ''} in the last 30 days
                 </p>
-                <div className="coaching-text">{coaching.advice}</div>
+                <div className="coaching-text"><ReactMarkdown>{coaching.advice}</ReactMarkdown></div>
               </div>
             )}
           </div>
@@ -820,7 +821,7 @@ useEffect(() => {
                     <p className="coaching-meta">
                       {new Date(entry.created_at).toLocaleDateString()} — {entry.session_count} session{entry.session_count !== 1 ? 's' : ''} analyzed
                     </p>
-                    <div className="coaching-text">{entry.response_text}</div>
+                    <div className="coaching-text"><ReactMarkdown>{entry.response_text}</ReactMarkdown></div>
                   </div>
                 ))}
               </div>
