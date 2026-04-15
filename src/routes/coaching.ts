@@ -1,9 +1,8 @@
 import { Router, Request, Response } from 'express';
-import Anthropic from '@anthropic-ai/sdk';
 import pool from '../config/db';
 import { isAuthenticated } from '../middleware/auth';
 import { cacheGet, cacheSet, cacheKeys } from '../config/cache';
-import { generatePracticeCoaching } from '../services/anthropic';
+import { generatePracticeCoaching } from '../services/gemini';
 import { PracticeSession, CoachingHistory } from '../types';
 
 const router = Router();
@@ -62,15 +61,15 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
     res.set('Cache-Control', `private, max-age=${COACHING_TTL}`);
     res.json(payload);
   } catch (error) {
-    if (error instanceof Anthropic.APIError) {
-      console.error('Anthropic API error:', error.status, error.message);
-      res.status(503).json({
-        error: 'Coaching service is temporarily unavailable. Please try again later.',
-      });
+    const message = error instanceof Error ? error.message : String(error);
+    if (message.includes('GEMINI_API_KEY')) {
+      res.status(503).json({ error: 'Coaching service is not configured.' });
       return;
     }
     console.error('Coaching error:', error);
-    res.status(500).json({ error: 'Server error' });
+    res.status(503).json({
+      error: 'Coaching service is temporarily unavailable. Please try again later.',
+    });
   }
 });
 

@@ -11,20 +11,25 @@ import coachingRouter from './routes/coaching';
 
 // ── Validate required environment variables at startup ───────────────────────
 
-const REQUIRED_ENV = [
-  'DATABASE_URL',
-  'SESSION_SECRET',
+const REQUIRED_ENV = ['DATABASE_URL', 'SESSION_SECRET'] as const;
+const OPTIONAL_ENV = [
   'GOOGLE_CLIENT_ID',
   'GOOGLE_CLIENT_SECRET',
   'GOOGLE_CALLBACK_URL',
   'REDIS_URL',
-  'ANTHROPIC_API_KEY',
+  'GEMINI_API_KEY',
 ] as const;
 
 for (const key of REQUIRED_ENV) {
   if (!process.env[key]) {
     console.error(`❌ Missing required environment variable: ${key}`);
     process.exit(1);
+  }
+}
+
+for (const key of OPTIONAL_ENV) {
+  if (!process.env[key]) {
+    console.warn(`⚠️  Missing environment variable: ${key} — related features will be unavailable`);
   }
 }
 

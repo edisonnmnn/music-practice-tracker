@@ -1,26 +1,17 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 const api = axios.create({
   baseURL: API_URL,
-});
-
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
+  withCredentials: true, // send session cookie on every request
 });
 
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Token expired or invalid
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      // Session expired — redirect to login
       window.location.href = '/login';
     }
     return Promise.reject(error);
@@ -28,19 +19,26 @@ api.interceptors.response.use(
 );
 
 export const authAPI = {
-  register: (name, email, password) => 
-    api.post('/auth/register', { name, email, password }),
-  login: (email, password) => 
-    api.post('/auth/login', { email, password }),
+  // Returns the currently logged-in user from the session
+  me: () => api.get('/auth/me'),
+  // Logout destroys the server session
+  logout: () => api.post('/auth/logout'),
+  // Google OAuth is initiated by navigating the browser to this URL
+  googleLoginUrl: `${API_URL}/auth/google`,
 };
 
 export const sessionsAPI = {
-  getAll: () => api.get('/sessions'),
-  getOne: (id) => api.get(`/sessions/${id}`),
-  create: (data) => api.post('/sessions', data),
-  update: (id, data) => api.put(`/sessions/${id}`, data),
-  delete: (id) => api.delete(`/sessions/${id}`),
-  getStats: () => api.get('/sessions/stats'),
+  getAll: () => api.get('/api/sessions'),
+  getOne: (id) => api.get(`/api/sessions/${id}`),
+  create: (data) => api.post('/api/sessions', data),
+  update: (id, data) => api.put(`/api/sessions/${id}`, data),
+  delete: (id) => api.delete(`/api/sessions/${id}`),
+  getStats: () => api.get('/api/sessions/stats'),
+};
+
+export const coachingAPI = {
+  getAdvice: () => api.get('/api/coaching'),
+  getHistory: (page = 1) => api.get(`/api/coaching/history?page=${page}`),
 };
 
 export default api;

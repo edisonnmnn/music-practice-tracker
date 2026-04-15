@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { sessionsAPI } from '../services/api';
+import { sessionsAPI, authAPI } from '../services/api';
 import Calendar from 'react-calendar';
 import { Line } from 'react-chartjs-2';
 import {
@@ -27,9 +27,8 @@ ChartJS.register(
   Legend
 );
 
-function Dashboard() {
+function Dashboard({ user }) {
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem('user') || '{"name":"User"}');
   
   // State
   const [sessions, setSessions] = useState([]);
@@ -269,9 +268,12 @@ useEffect(() => {
     a.click();
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+  const handleLogout = async () => {
+    try {
+      await authAPI.logout();
+    } catch {
+      // ignore — we're navigating away anyway
+    }
     navigate('/login');
   };
 
@@ -380,7 +382,7 @@ useEffect(() => {
       <header className="dashboard-header">
         <div>
           <h1>Personal Practice Tracker</h1>
-          <p>Welcome back, {user.name}!</p>
+          <p>Welcome back, {user?.name || 'User'}!</p>
         </div>
         <button onClick={handleLogout} className="btn-secondary">
           Logout

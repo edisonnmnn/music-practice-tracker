@@ -7,10 +7,13 @@ const router = Router();
 
 // ── GET /auth/google — Kick off the OAuth flow ───────────────────────────────
 
-router.get(
-  '/google',
-  passport.authenticate('google', { scope: ['profile', 'email'] }),
-);
+router.get('/google', (req, res, next) => {
+  if (!process.env.GOOGLE_CLIENT_ID) {
+    res.status(503).json({ error: 'Google OAuth is not configured on this server' });
+    return;
+  }
+  passport.authenticate('google', { scope: ['profile', 'email'] })(req, res, next);
+});
 
 // ── GET /auth/google/callback — Google redirects here after consent ──────────
 

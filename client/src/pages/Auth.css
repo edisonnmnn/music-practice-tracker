@@ -87,3 +87,23 @@
 .auth-link a:hover {
   text-decoration: underline;
 }
+
+.google-btn {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  background: #4285f4;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.google-btn:hover {
+  background: #3367d6;
+}
