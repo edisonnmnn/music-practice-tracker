@@ -512,7 +512,6 @@
 /* Goal History */
 .goal-history {
   display: flex;
-  font-family:Georgia, 'Times New Roman', Times, serif;
   flex-direction: column;
   gap: 15px;
 }
@@ -523,13 +522,11 @@
   border-radius: 12px;
   padding: 20px;
   transition: all 0.2s;
-  font-family:Georgia, 'Times New Roman', Times, serif;
 }
 
 .history-item:hover {
   border-color: #273055;
   box-shadow: 0 4px 12px rgba(39, 48, 85, 0.1);
-  font-family:Georgia, 'Times New Roman', Times, serif;
 }
 
 .history-date {
