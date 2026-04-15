@@ -1,18 +1,23 @@
+FROM node:18-alpine AS builder
+
+WORKDIR /app
+
+COPY package*.json tsconfig.json ./
+RUN npm ci
+COPY src/ ./src/
+RUN npx tsc --noEmit false
+
+# ── Production image ──────────────────────────────────────────────────────────
+
 FROM node:18-alpine
 
 WORKDIR /app
 
-# Copy package files
 COPY package*.json ./
+RUN npm ci --omit=dev
 
-# Install dependencies
-RUN npm install
+COPY --from=builder /app/dist ./dist
 
-# Copy app files
-COPY . .
-
-# Expose port
 EXPOSE 3001
 
-# Start the app
-CMD ["npm", "run", "dev"]
+CMD ["node", "dist/index.js"]
