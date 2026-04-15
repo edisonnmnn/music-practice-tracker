@@ -17,9 +17,7 @@ function Register() {
     setLoading(true);
 
     try {
-      const response = await authAPI.register(name, email, password);
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+      await authAPI.register(name, email, password);
       navigate('/dashboard');
     } catch (err) {
       setError(err.response?.data?.error || 'Registration failed');
@@ -32,11 +30,18 @@ function Register() {
     <div className="auth-container">
       <div className="auth-box">
         <h2>Practice Tracker</h2>
-        <h3>Register</h3>
+        <h3>Create an account</h3>
+
+        <a href={authAPI.googleLoginUrl} className="google-btn">
+          Sign up with Google
+        </a>
+
+        <div className="divider"><span>or</span></div>
+
         <form onSubmit={handleSubmit}>
           <input
             type="text"
-            placeholder="First Name"
+            placeholder="Name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
@@ -50,11 +55,11 @@ function Register() {
           />
           <input
             type="password"
-            placeholder="Password (min 8 characters)"
+            placeholder="Password (8+ characters)"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            minLength="8"
+            minLength={8}
           />
           <button type="submit" disabled={loading}>
             {loading ? 'Creating account...' : 'Register'}

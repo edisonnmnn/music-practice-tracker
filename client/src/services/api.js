@@ -23,11 +23,10 @@ api.interceptors.response.use(
 );
 
 export const authAPI = {
-  // Returns the currently logged-in user from the session
   me: () => api.get('/auth/me'),
-  // Logout destroys the server session
+  register: (name, email, password) => api.post('/auth/register', { name, email, password }),
+  login: (email, password) => api.post('/auth/login', { email, password }),
   logout: () => api.post('/auth/logout'),
-  // Google OAuth is initiated by navigating the browser to this URL
   googleLoginUrl: `${API_URL}/auth/google`,
 };
 
