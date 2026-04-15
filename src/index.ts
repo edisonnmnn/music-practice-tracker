@@ -38,6 +38,10 @@ for (const key of OPTIONAL_ENV) {
 const app = express();
 const PORT = process.env.PORT ?? 3001;
 
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
 app.use(
   cors({
     origin: process.env.FRONTEND_URL || 'http://localhost:5173',
@@ -59,8 +63,9 @@ app.use(
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       maxAge: 1000 * 60 * 60 * 24 * 14, // 14 days
-      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     },
+    proxy: process.env.NODE_ENV === 'production', // trust Railway's reverse proxy
   }),
 );
 
