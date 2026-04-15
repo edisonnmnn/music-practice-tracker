@@ -512,6 +512,7 @@
 /* Goal History */
 .goal-history {
   display: flex;
+  font-family:Georgia, 'Times New Roman', Times, serif;
   flex-direction: column;
   gap: 15px;
 }
@@ -844,6 +845,7 @@
 .coaching-history-section h2 {
   margin: 0 0 8px 0;
   font-weight: bold;
+  font-family:Georgia, 'Times New Roman', Times, serif;
   font-style: italic;
 }
 
