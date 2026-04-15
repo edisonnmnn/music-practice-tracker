@@ -1,32 +1,20 @@
 import { Router, Request, Response } from 'express';
 import pool from '../config/db';
 import { isAuthenticated } from '../middleware/auth';
-import { cacheGet, cacheSet, cacheInvalidate, cacheKeys } from '../config/cache';
-import { generatePracticeCoaching } from '../services/gemini';
+import { streamPracticeCoaching } from '../services/gemini';
 import { PracticeSession, CoachingHistory } from '../types';
 
 const router = Router();
 router.use(isAuthenticated);
 
-const COACHING_TTL = 3600; // 1 hour
-const PAGE_SIZE    = 10;
+const PAGE_SIZE = 10;
 
-// ── POST /api/coaching — Generate coaching advice (accepts optional user prompt) ─
+// ── POST /api/coaching — Stream coaching advice via SSE ──────────────────────
 
 router.post('/', async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = req.user!.id;
     const userPrompt = (req.body as { prompt?: string }).prompt?.trim() || '';
-
-    // Only use cache when there's no custom prompt
-    if (!userPrompt) {
-      const cacheKey = cacheKeys.userCoaching(userId);
-      const cached = await cacheGet<{ advice: string; sessionCount: number }>(cacheKey);
-      if (cached) {
-        res.json(cached);
-        return;
-      }
-    }
 
     // Fetch sessions from last 30 days
     const thirtyDaysAgo = new Date();
@@ -45,28 +33,36 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
       res.json({
         advice: "You haven't logged any practice sessions in the last 30 days. Start logging your sessions to receive personalised coaching advice!",
         sessionCount: 0,
+        done: true,
       });
       return;
     }
 
-    const advice = await generatePracticeCoaching(sessions, userPrompt);
+    // Set up SSE
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
 
-    // Persist to coaching_history
+    // Send session count first
+    res.write(`data: ${JSON.stringify({ sessionCount: sessions.length })}\n\n`);
+
+    let fullText = '';
+
+    for await (const chunk of streamPracticeCoaching(sessions, userPrompt)) {
+      fullText += chunk;
+      res.write(`data: ${JSON.stringify({ chunk })}\n\n`);
+    }
+
+    // Signal done
+    res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
+    res.end();
+
+    // Save to history after streaming completes
     await pool.query(
       `INSERT INTO coaching_history (user_id, response_text, session_count)
        VALUES ($1, $2, $3)`,
-      [userId, advice, sessions.length],
+      [userId, fullText, sessions.length],
     );
-
-    const payload = { advice, sessionCount: sessions.length };
-
-    // Only cache generic requests
-    if (!userPrompt) {
-      const cacheKey = cacheKeys.userCoaching(userId);
-      await cacheSet(cacheKey, payload, COACHING_TTL);
-    }
-
-    res.json(payload);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     if (message.includes('GEMINI_API_KEY')) {
@@ -74,9 +70,14 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
       return;
     }
     console.error('Coaching error:', error);
-    res.status(503).json({
-      error: 'Coaching service is temporarily unavailable. Please try again later.',
-    });
+    if (!res.headersSent) {
+      res.status(503).json({
+        error: 'Coaching service is temporarily unavailable. Please try again later.',
+      });
+    } else {
+      res.write(`data: ${JSON.stringify({ error: 'Stream interrupted' })}\n\n`);
+      res.end();
+    }
   }
 });
 

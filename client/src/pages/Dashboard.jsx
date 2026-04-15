@@ -761,21 +761,28 @@ useEffect(() => {
               Ask a question about your practice, or get general coaching based on your last 30 days.
             </p>
             <form
-              onSubmit={async (e) => {
+              onSubmit={(e) => {
                 e.preventDefault();
+                if (coachingLoading) return;
                 setCoachingLoading(true);
                 setCoachingError('');
-                setCoaching(null);
-                try {
-                  const res = await coachingAPI.getAdvice(coachingPrompt);
-                  setCoaching(res.data);
-                } catch (err) {
-                  setCoachingError(
-                    err.response?.data?.error || 'Failed to get coaching advice'
-                  );
-                } finally {
-                  setCoachingLoading(false);
-                }
+                setCoaching({ advice: '', sessionCount: 0 });
+                const prompt = coachingPrompt;
+                setCoachingPrompt('');
+
+                coachingAPI.streamAdvice(
+                  prompt,
+                  (chunk) => setCoaching((prev) => ({
+                    ...prev,
+                    advice: (prev?.advice || '') + chunk,
+                  })),
+                  (meta) => setCoaching((prev) => ({ ...prev, ...meta })),
+                  () => setCoachingLoading(false),
+                  (err) => {
+                    setCoachingError(err);
+                    setCoachingLoading(false);
+                  },
+                );
               }}
               className="coaching-form"
             >
@@ -801,12 +808,13 @@ useEffect(() => {
               </div>
             )}
 
-            {coaching && (
+            {coaching && coaching.advice && (
               <div className="coaching-response">
                 <p className="coaching-meta">
                   Based on {coaching.sessionCount} session{coaching.sessionCount !== 1 ? 's' : ''} in the last 30 days
                 </p>
                 <div className="coaching-text"><ReactMarkdown>{coaching.advice}</ReactMarkdown></div>
+                {coachingLoading && <span className="coaching-cursor">|</span>}
               </div>
             )}
           </div>

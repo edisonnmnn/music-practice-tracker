@@ -17,23 +17,8 @@ function formatSessionsForPrompt(sessions: PracticeSession[]): string {
     .join('\n');
 }
 
-export async function generatePracticeCoaching(
-  sessions: PracticeSession[],
-  userPrompt?: string,
-): Promise<string> {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    throw new Error('GEMINI_API_KEY is not configured');
-  }
-
-  const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({
-    model: 'gemini-2.5-flash',
-    systemInstruction: SYSTEM_PROMPT,
-  });
-
+function buildPrompt(sessions: PracticeSession[], userPrompt?: string): string {
   const sessionSummary = formatSessionsForPrompt(sessions);
-
   let prompt = `Here are my practice sessions from the last 30 days:\n\n${sessionSummary}\n\n`;
 
   if (userPrompt) {
@@ -42,9 +27,40 @@ export async function generatePracticeCoaching(
     prompt += 'Please give me personalised coaching advice based on this history.';
   }
 
-  const result = await model.generateContent(prompt);
+  return prompt;
+}
 
+function getModel() {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) throw new Error('GEMINI_API_KEY is not configured');
+
+  const genAI = new GoogleGenerativeAI(apiKey);
+  return genAI.getGenerativeModel({
+    model: 'gemini-2.5-flash',
+    systemInstruction: SYSTEM_PROMPT,
+  });
+}
+
+export async function generatePracticeCoaching(
+  sessions: PracticeSession[],
+  userPrompt?: string,
+): Promise<string> {
+  const model = getModel();
+  const result = await model.generateContent(buildPrompt(sessions, userPrompt));
   const text = result.response.text();
   if (!text) throw new Error('No text response from Gemini');
   return text;
+}
+
+export async function* streamPracticeCoaching(
+  sessions: PracticeSession[],
+  userPrompt?: string,
+): AsyncGenerator<string> {
+  const model = getModel();
+  const result = await model.generateContentStream(buildPrompt(sessions, userPrompt));
+
+  for await (const chunk of result.stream) {
+    const text = chunk.text();
+    if (text) yield text;
+  }
 }
