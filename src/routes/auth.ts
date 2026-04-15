@@ -17,13 +17,27 @@ router.get('/google', (req, res, next) => {
 
 // ── GET /auth/google/callback — Google redirects here after consent ──────────
 
-router.get(
-  '/google/callback',
-  passport.authenticate('google', { failureRedirect: '/auth/failure' }),
-  (_req: Request, res: Response): void => {
-    res.redirect(process.env.FRONTEND_URL || 'http://localhost:5173');
-  },
-);
+router.get('/google/callback', (req: Request, res: Response, next) => {
+  passport.authenticate('google', (err: Error | null, user: User | false) => {
+    if (err) {
+      console.error('Google OAuth error:', err);
+      res.status(500).json({ error: 'Authentication failed', details: err.message });
+      return;
+    }
+    if (!user) {
+      res.redirect('/auth/failure');
+      return;
+    }
+    req.logIn(user, (loginErr) => {
+      if (loginErr) {
+        console.error('Session login error:', loginErr);
+        res.status(500).json({ error: 'Session creation failed', details: loginErr.message });
+        return;
+      }
+      res.redirect(process.env.FRONTEND_URL || 'http://localhost:5173');
+    });
+  })(req, res, next);
+});
 
 // ── GET /auth/failure — OAuth failure landing ────────────────────────────────
 
