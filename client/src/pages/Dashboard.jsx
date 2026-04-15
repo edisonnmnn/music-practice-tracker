@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { sessionsAPI, authAPI } from '../services/api';
+import { sessionsAPI, authAPI, coachingAPI } from '../services/api';
 import Calendar from 'react-calendar';
 import { Line } from 'react-chartjs-2';
 import {
@@ -37,7 +37,13 @@ function Dashboard({ user }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('overview');
-  
+
+  // Coaching state
+  const [coaching, setCoaching] = useState(null);
+  const [coachingHistory, setCoachingHistory] = useState([]);
+  const [coachingLoading, setCoachingLoading] = useState(false);
+  const [coachingError, setCoachingError] = useState('');
+
   // Form state
   const [showForm, setShowForm] = useState(false);
   const [editingSession, setEditingSession] = useState(null);
@@ -405,11 +411,17 @@ useEffect(() => {
         >
           Calendar
         </button>
-        <button 
+        <button
           className={activeTab === 'stats' ? 'tab active' : 'tab'}
           onClick={() => setActiveTab('stats')}
         >
           Statistics
+        </button>
+        <button
+          className={activeTab === 'coaching' ? 'tab active' : 'tab'}
+          onClick={() => setActiveTab('coaching')}
+        >
+          AI Coach
         </button>
       </div>
 
@@ -734,6 +746,85 @@ useEffect(() => {
                   </div>
                 ))}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Coaching Tab */}
+      {activeTab === 'coaching' && (
+        <div className="coaching-view">
+          <div className="coaching-card">
+            <h2>AI Practice Coach</h2>
+            <p className="coaching-description">
+              Get personalised advice based on your practice sessions from the last 30 days.
+            </p>
+            <button
+              onClick={async () => {
+                setCoachingLoading(true);
+                setCoachingError('');
+                try {
+                  const res = await coachingAPI.getAdvice();
+                  setCoaching(res.data);
+                } catch (err) {
+                  setCoachingError(
+                    err.response?.data?.error || 'Failed to get coaching advice'
+                  );
+                } finally {
+                  setCoachingLoading(false);
+                }
+              }}
+              className="btn-primary"
+              disabled={coachingLoading}
+            >
+              {coachingLoading ? 'Thinking...' : 'Get Coaching Advice'}
+            </button>
+
+            {coachingError && (
+              <div className="error-banner" style={{ marginTop: '15px' }}>
+                {coachingError}
+              </div>
+            )}
+
+            {coaching && (
+              <div className="coaching-response">
+                <p className="coaching-meta">
+                  Based on {coaching.sessionCount} session{coaching.sessionCount !== 1 ? 's' : ''} in the last 30 days
+                </p>
+                <div className="coaching-text">{coaching.advice}</div>
+              </div>
+            )}
+          </div>
+
+          {/* Coaching History */}
+          <div className="coaching-history-section">
+            <h2>Past Coaching</h2>
+            {coachingHistory.length === 0 && !coachingLoading && (
+              <button
+                onClick={async () => {
+                  try {
+                    const res = await coachingAPI.getHistory();
+                    setCoachingHistory(res.data.history);
+                  } catch {
+                    // ignore
+                  }
+                }}
+                className="btn-secondary"
+              >
+                Load History
+              </button>
+            )}
+            {coachingHistory.length > 0 && (
+              <div className="coaching-history-list">
+                {coachingHistory.map((entry) => (
+                  <div key={entry.id} className="coaching-history-item">
+                    <p className="coaching-meta">
+                      {new Date(entry.created_at).toLocaleDateString()} — {entry.session_count} session{entry.session_count !== 1 ? 's' : ''} analyzed
+                    </p>
+                    <div className="coaching-text">{entry.response_text}</div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
