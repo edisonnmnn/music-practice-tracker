@@ -49,6 +49,11 @@ function Login() {
   return (
     <div className="auth-container">
       <div className="auth-box">
+        <img
+          src="/static/music-notes-clipart-title.png"
+          alt=""
+          className="auth-logo"
+        />
         <h2>Practice Tracker</h2>
         <h3>Sign in to continue</h3>
 
