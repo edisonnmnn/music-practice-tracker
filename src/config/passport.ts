@@ -28,14 +28,33 @@ if (
           const googleId = profile.id;
           const profilePicture = profile.photos?.[0]?.value ?? null;
 
-          // Check if user already exists
-          const existing = await pool.query<User>(
+          // Check if user already exists by google_id
+          const existingByGoogleId = await pool.query<User>(
             'SELECT * FROM users WHERE google_id = $1',
             [googleId],
           );
 
-          if (existing.rows.length > 0) {
-            return done(null, existing.rows[0]);
+          if (existingByGoogleId.rows.length > 0) {
+            return done(null, existingByGoogleId.rows[0]);
+          }
+
+          // Check if a user exists with this email (e.g. registered locally) and link the Google account
+          if (email) {
+            const existingByEmail = await pool.query<User>(
+              'SELECT * FROM users WHERE email = $1',
+              [email],
+            );
+
+            if (existingByEmail.rows.length > 0) {
+              const linked = await pool.query<User>(
+                `UPDATE users
+                 SET google_id = $1, profile_picture = COALESCE(profile_picture, $2)
+                 WHERE id = $3
+                 RETURNING *`,
+                [googleId, profilePicture, existingByEmail.rows[0].id],
+              );
+              return done(null, linked.rows[0]);
+            }
           }
 
           // Create new user on first login
