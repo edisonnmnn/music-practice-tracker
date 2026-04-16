@@ -129,23 +129,27 @@ router.get('/google', (req: Request, res: Response, next: NextFunction) => {
 // ── GET /auth/google/callback — Google redirects here after consent ──────────
 
 router.get('/google/callback', (req: Request, res: Response, next: NextFunction) => {
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+  const loginUrl = (reason: string) =>
+    `${frontendUrl}/login?error=${encodeURIComponent(reason)}`;
+
   passport.authenticate('google', (err: Error | null, user: User | false) => {
     if (err) {
       console.error('Google OAuth error:', err);
-      res.status(500).json({ error: 'Authentication failed', details: err.message });
+      res.redirect(loginUrl('Google sign-in failed. Please try again.'));
       return;
     }
     if (!user) {
-      res.redirect('/auth/failure');
+      res.redirect(loginUrl('Google sign-in was cancelled or denied.'));
       return;
     }
     req.logIn(user, (loginErr) => {
       if (loginErr) {
         console.error('Session login error:', loginErr);
-        res.status(500).json({ error: 'Session creation failed', details: loginErr.message });
+        res.redirect(loginUrl('Could not start your session. Please try again.'));
         return;
       }
-      res.redirect(process.env.FRONTEND_URL || 'http://localhost:5173');
+      res.redirect(frontendUrl);
     });
   })(req, res, next);
 });
@@ -153,7 +157,8 @@ router.get('/google/callback', (req: Request, res: Response, next: NextFunction)
 // ── GET /auth/failure — OAuth failure landing ────────────────────────────────
 
 router.get('/failure', (_req: Request, res: Response): void => {
-  res.status(401).json({ error: 'Google authentication failed' });
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+  res.redirect(`${frontendUrl}/login?error=${encodeURIComponent('Google authentication failed')}`);
 });
 
 // ── GET /auth/me — Return the currently logged-in user ──────────────────────

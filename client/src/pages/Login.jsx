@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { authAPI } from '../services/api';
 import './Auth.css';
 
 function Login() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [checking, setChecking] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -16,6 +17,15 @@ function Login() {
       .then(() => navigate('/dashboard'))
       .catch(() => setChecking(false));
   }, [navigate]);
+
+  useEffect(() => {
+    const errParam = searchParams.get('error');
+    if (errParam) {
+      setError(errParam);
+      searchParams.delete('error');
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
